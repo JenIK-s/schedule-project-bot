@@ -1,8 +1,7 @@
 from datetime import datetime, date
 import os
+
 from dotenv import load_dotenv
-
-
 from telegram.ext import CommandHandler, CallbackQueryHandler, Updater
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -10,14 +9,14 @@ from functions import forming_string, add_user_to_database, get_group
 
 load_dotenv()
 updater = Updater(token=os.getenv('TOKEN'))
-day_of_the_week: int = date.today().weekday()
 
-week_number = datetime.today().isocalendar()[1]
 
 
 def handle_button_press(update, context):
-    global day_of_the_week
-
+    day_of_the_week: int = date.today().weekday()
+    week_number = datetime.today().isocalendar()[1]
+    print(week_number)
+    print(day_of_the_week)
     query = update.callback_query
     user_id = update.effective_chat.id
     button_data = query.data
@@ -39,7 +38,7 @@ def handle_button_press(update, context):
         ],
     ]
     reply_markup = InlineKeyboardMarkup(buttons_schedule)
-    if day_of_the_week % 2 == 0:
+    if week_number % 2 != 0:
         week = 'Числитель'
     else:
         week = 'Знаменатель'
@@ -73,9 +72,13 @@ def handle_button_press(update, context):
         case 'schedule_tomorrow':
             try:
                 group = get_group(user_id)
+                day_of_the_week_backup = day_of_the_week
                 if day_of_the_week == 6:
                     day_of_the_week = 0
-                    week = 'Знаменатель'
+                    if week_number % 2 == 0:
+                        week = 'Числитель'
+                    else:
+                        week = 'Знаменатель'
                 else:
                     day_of_the_week += 1
                 result_string = forming_string(week, group, day_of_the_week)
@@ -83,6 +86,7 @@ def handle_button_press(update, context):
                                          text=result_string,
                                          reply_markup=reply_markup,
                                          )
+                day_of_the_week = day_of_the_week_backup
             except:
                 context.bot.send_message(chat_id=user_id,
                                          text='Ошибка отправки...',

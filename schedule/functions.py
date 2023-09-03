@@ -16,7 +16,6 @@ schedule_path = 'DATABASES/schedule.json'
 users_path = 'DATABASES/users.json'
 
 
-
 def forming_string(week: str, group: str, day_of_the_week: int) -> str:
     """
     Формирование строки с расписанием
